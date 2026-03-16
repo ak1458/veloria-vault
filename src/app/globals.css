@@ -1,26 +1,207 @@
 @import "tailwindcss";
 
+/* Font Family Variables - Provided via Next.js next/font */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand Colors */
+  --color-primary: #1a1a1a;
+  --color-gold: #b59a5c;
+  --color-cream: #f7efe6;
+  --color-gray-100: #f7f7f7;
+  --color-gray-200: #f1f1f1;
+  --color-gray-300: #e5e5e5;
+  --color-gray-400: #a5a5a5;
+  --color-gray-500: #767676;
+  --color-gray-600: #666;
+  --color-gray-700: #555;
+  --color-gray-800: #333;
+  --color-gray-900: #242424;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: #faf8f5;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Typography Utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-lato {
+  font-family: var(--font-lato);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Smooth image loading */
+img {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+img[data-loading="true"] {
+  opacity: 0;
+}
+
+/* Mobile bottom nav safe area */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.6s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.4s ease-out;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+/* Legacy Content Fixes */
+[dangerouslySetInnerHTML] svg,
+.wd-content-layout svg {
+  max-width: 100px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-gold);
+  color: white;
+}
+
+/* Hide scrollbar for horizontal scroll containers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Prose (Utility Typography fallback for Static Pages) */
+.prose {
+  color: var(--color-gray-800) !important;
+  line-height: 1.8 !important;
+}
+
+.prose p {
+  margin-bottom: 1.5rem !important;
+  display: block !important;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: var(--color-primary) !important;
+  font-weight: 600 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  display: block !important;
+}
+
+.prose h1 { font-size: 2rem !important; }
+.prose h2 { font-size: 1.5rem !important; }
+.prose h3 { font-size: 1.25rem !important; }
+
+.prose ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.prose ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.prose li {
+  margin-bottom: 0.5rem !important;
+  display: list-item !important;
+}
+
+.prose strong {
+  font-weight: 700 !important;
+  color: black !important;
+}
+
+.prose-lg {
+  font-size: 1.05rem !important;
+}
+

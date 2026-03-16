@@ -1,0 +1,1 @@
+The 404 error you see with "Trajectory ID" and "Sherlog" points to an extension

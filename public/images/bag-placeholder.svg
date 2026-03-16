@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#f0ebe3"/>
+  <rect x="100" y="80" width="200" height="240" rx="20" fill="#d4c5b0" stroke="#8B7355" stroke-width="2"/>
+  <path d="M150 80 C150 40 250 40 250 80" fill="none" stroke="#8B7355" stroke-width="3"/>
+  <rect x="140" y="160" width="120" height="80" rx="8" fill="#e8ddd0"/>
+  <circle cx="200" cy="200" r="15" fill="#8B7355" opacity="0.3"/>
+  <text x="200" y="360" text-anchor="middle" fill="#8B7355" font-family="serif" font-size="14" opacity="0.6">Veloria Vault</text>
+</svg>
