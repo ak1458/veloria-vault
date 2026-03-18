@@ -1,0 +1,77 @@
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { getCustomerByEmail } from "@/lib/woocommerce-customer";
+import { generateToken } from "@/lib/auth/jwt";
+
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validatedData = loginSchema.parse(body);
+
+    // Get customer from WooCommerce
+    const customer = await getCustomerByEmail(validatedData.email);
+
+    if (!customer) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email or password" },
+        { status: 401 }
+      );
+    }
+
+    // Note: WooCommerce REST API doesn't provide password verification
+    // In production, use a plugin like "JWT Authentication for WP REST API"
+    // or verify against your own auth system
+    // For now, we assume the password is valid if customer exists
+    // THIS IS NOT SECURE FOR PRODUCTION - implement proper password verification
+
+    // Generate JWT token
+    const token = generateToken({
+      userId: customer.id,
+      email: customer.email,
+      displayName: `${customer.first_name} ${customer.last_name}`.trim(),
+    });
+
+    const response = NextResponse.json({
+      success: true,
+      customer: {
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.first_name,
+        lastName: customer.last_name,
+        displayName: `${customer.first_name} ${customer.last_name}`.trim(),
+        billing: customer.billing,
+        shipping: customer.shipping,
+      },
+    });
+
+    response.cookies.set({
+      name: "token",
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    });
+
+    return response;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { success: false, error: "Validation failed", details: error.issues },
+        { status: 400 }
+      );
+    }
+
+    console.error("Login error:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

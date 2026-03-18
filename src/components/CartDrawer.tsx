@@ -33,6 +33,13 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     };
   }, [isOpen, onClose]);
 
+  const handleCheckout = () => {
+    if (items.length === 0) return;
+    
+    // Navigate to internal checkout
+    window.location.href = "/checkout";
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -92,7 +99,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div key={item.id} className="flex gap-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100">
                       <div className="relative w-20 h-20 bg-gray-50 rounded overflow-hidden flex-shrink-0">
                         <Image
-                          src={item.image || "/placeholder.jpg"}
+                           src={item.image || "/placeholder.jpg"}
                           alt={item.name}
                           fill
                           className="object-cover"
@@ -163,13 +170,12 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   >
                     View Cart
                   </Link>
-                  <Link
-                    href="/checkout"
-                    onClick={onClose}
+                  <button
+                    onClick={handleCheckout}
                     className="flex items-center justify-center bg-[#1a1a1a] text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-[#b59a5c] transition-colors text-center"
                   >
                     Checkout
-                  </Link>
+                  </button>
                 </div>
               </div>
             )}
@@ -177,5 +183,6 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         </>
       )}
     </AnimatePresence>
+
   );
 }

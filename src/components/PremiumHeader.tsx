@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { useCartStore } from "@/store/cart";
 import { useWishlistStore } from "@/store/wishlist";
@@ -132,11 +133,14 @@ export default function PremiumHeader() {
           <div className="container mx-auto px-4 sm:px-6">
             <div className="flex items-center justify-between py-4">
               <div className="flex-1" />
-              <Link href="/" className="block">
-                <img
+              <Link href="/" className="block relative h-12 w-48">
+                <Image
                   src={DESKTOP_LOGO}
                   alt="Veloria Vault"
-                  className="h-12 transition-all duration-300"
+                  fill
+                  className="object-contain"
+                  priority
+                  sizes="192px"
                 />
               </Link>
               <div className="flex-1 flex items-center justify-end space-x-4">
@@ -239,11 +243,14 @@ export default function PremiumHeader() {
               </button>
 
               {/* Logo - Shifted right with padding for visual centering */}
-              <Link href="/" className="block pl-4">
-                <img
+              <Link href="/" className="block pl-4 relative h-10 w-40">
+                <Image
                   src={MOBILE_LOGO}
                   alt="Veloria Vault"
-                  className="h-10"
+                  fill
+                  className="object-contain"
+                  priority
+                  sizes="160px"
                 />
               </Link>
 
@@ -296,11 +303,13 @@ export default function PremiumHeader() {
           >
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <Link href="/" onClick={closeMobileMenu}>
-                  <img 
+                <Link href="/" onClick={closeMobileMenu} className="relative h-10 w-40">
+                  <Image 
                     src={MOBILE_LOGO} 
                     alt="Veloria Vault" 
-                    className="h-10"
+                    fill
+                    className="object-contain"
+                    sizes="160px"
                   />
                 </Link>
                 <button

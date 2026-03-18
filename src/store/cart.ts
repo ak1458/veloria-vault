@@ -20,6 +20,7 @@ interface CartState {
   clearCart: () => void;
   getTotalItems: () => number;
   getSubtotal: () => number;
+  getItemCount: () => number;
   openCart: () => void;
   closeCart: () => void;
 }
@@ -62,6 +63,8 @@ export const useCartStore = create<CartState>()(
       clearCart: () => set({ items: [] }),
 
       getTotalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+
+      getItemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
 
       getSubtotal: () =>
         get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),

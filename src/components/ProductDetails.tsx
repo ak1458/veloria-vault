@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCartStore } from "@/store/cart";
 import { useWishlistStore } from "@/store/wishlist";
 import type { WCProduct } from "@/lib/woocommerce";
-import { Heart, ChevronLeft, ChevronRight, Star, Check, Share2, Facebook, Twitter, Instagram, Linkedin, Minus, Plus, ArrowLeftRight } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight, Star, Check, Minus, Plus } from "lucide-react";
+import ProductReviews from "./ProductReviews";
 
 interface ProductDetailsProps {
   product: WCProduct;
@@ -47,11 +49,13 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
   // Get variation options for color swatches FIRST
   const variationOptions = variations.map(v => {
     const colorAttr = v.attributes.find(a => a.slug === "pa_color" || a.name.toLowerCase().includes("color"));
+    // WooCommerce variations have image in meta or images array
+    const variationImage = v.images?.[0]?.src || product.images?.[0]?.src || "/images/bag-placeholder.svg";
     return {
       id: v.id,
       color: colorAttr?.option || "",
       slug: v.slug,
-      image: (v as any).image?.src || v.images?.[0]?.src || product.images?.[0]?.src || "/images/bag-placeholder.svg",
+      image: variationImage,
       price: v.price,
       product: v,
     };
@@ -174,16 +178,18 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
                       <button
                         key={globalIndex}
                         onClick={() => setSelectedImage(globalIndex)}
-                        className={`aspect-square w-full bg-white overflow-hidden border-2 transition-all ${
+                        className={`aspect-square w-full bg-white overflow-hidden border-2 transition-all relative ${
                           selectedImage === globalIndex 
                             ? "border-[#b59a5c]" 
                             : "border-gray-100 hover:border-gray-300"
                         }`}
                       >
-                        <img
+                        <Image
                           src={image.src}
                           alt={image.alt || `${product.name} ${globalIndex + 1}`}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="96px"
                         />
                       </button>
                     );
@@ -202,10 +208,13 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
 
             {/* Main Featured Image Container */}
             <div className="flex-1 relative aspect-square flex items-center justify-center overflow-hidden group">
-              <img
+              <Image
                 src={images[selectedImage]?.src}
                 alt={images[selectedImage]?.alt || product.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 60vw"
+                priority
               />
               {/* Navigation Arrows */}
               {images.length > 1 && (
@@ -234,16 +243,18 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`flex-shrink-0 w-20 h-20 bg-white rounded-lg overflow-hidden border-2 transition-all ${
+                  className={`flex-shrink-0 w-20 h-20 bg-white rounded-lg overflow-hidden border-2 transition-all relative ${
                     selectedImage === index 
                       ? "border-[#b59a5c]" 
                       : "border-transparent"
                   }`}
                 >
-                  <img
+                  <Image
                     src={image.src}
                     alt={image.alt || `${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="80px"
                   />
                 </button>
               ))}
@@ -254,19 +265,13 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
         {/* Product Info - Sticky sidebar */}
         <div className="lg:col-span-5 lg:sticky lg:top-20 lg:h-[calc(100vh-80px)] lg:overflow-y-auto px-4 py-8 md:p-12 md:px-16 bg-[#faf8f5] flex flex-col">
           {/* Breadcrumb */}
-          <nav className="flex items-center justify-between text-sm mb-4">
+          <nav className="flex items-center text-sm mb-4">
             <div className="flex items-center text-gray-500">
               <Link href="/" className="hover:text-black transition-colors">Home</Link>
               <span className="mx-2">/</span>
               <Link href={`/shop?category=${categorySlug}`} className="hover:text-black transition-colors capitalize">
                 {categoryName}
               </Link>
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="p-2 hover:bg-gray-100 rounded">
-                <Share2 size={18} className="text-gray-600" />
-              </button>
-              <ChevronRight size={18} className="text-gray-400" />
             </div>
           </nav>
 
@@ -336,13 +341,15 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
                     }`}
                     title={option.color}
                   >
-                    <img
+                    <Image
                       src={option.image}
                       alt={option.color}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="56px"
                     />
                     {selectedVariation?.id === option.id && (
-                      <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/10 flex items-center justify-center z-10">
                         <Check size={14} className="text-white drop-shadow-md" />
                       </div>
                     )}
@@ -396,18 +403,14 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
             </button>
           </div>
 
-          {/* Compare & Wishlist */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200 mb-6">
-            <button className="flex items-center gap-2 text-gray-600 hover:text-[#b59a5c] transition-colors text-sm">
-              <ArrowLeftRight size={16} />
-              <span>Add to compare</span>
-            </button>
+          {/* Wishlist */}
+          <div className="flex items-center justify-end pt-4 border-t border-gray-200 mb-6">
             <button 
               onClick={handleWishlistToggle}
               className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors text-sm"
             >
               <Heart size={16} fill={wishlisted ? "currentColor" : "none"} />
-              <span>Add to wishlist</span>
+              <span>{wishlisted ? "Remove from wishlist" : "Add to wishlist"}</span>
             </button>
           </div>
 
@@ -424,27 +427,6 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
               <Link href={`/shop?category=${categorySlug}`} className="hover:text-[#b59a5c] capitalize">
                 {categoryName}
               </Link>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-gray-900 font-medium">Tag:</span>
-              <span>{product.name}</span>
-            </div>
-            <div className="flex items-center gap-3 pt-2">
-              <span className="text-gray-900 font-medium">Share:</span>
-              <div className="flex items-center gap-3">
-                <button className="text-gray-400 hover:text-[#b59a5c] transition-colors">
-                  <Facebook size={14} />
-                </button>
-                <button className="text-gray-400 hover:text-[#b59a5c] transition-colors">
-                  <Twitter size={14} />
-                </button>
-                <button className="text-gray-400 hover:text-[#b59a5c] transition-colors">
-                  <Instagram size={14} />
-                </button>
-                <button className="text-gray-400 hover:text-[#b59a5c] transition-colors">
-                  <Linkedin size={14} />
-                </button>
-              </div>
             </div>
           </div>
 
@@ -507,29 +489,59 @@ export default function ProductDetails({ product, variations }: ProductDetailsPr
             {activeTab === "additional" && (
               <table className="w-full text-sm">
                 <tbody>
-                  {[
-                    { label: "Width", value: "36 cm" },
-                    { label: "Height", value: "28 cm" },
-                    { label: "Weight", value: "0.8 kg" },
-                    { label: "Hardware", value: "Premium rose gold-toned" },
-                    { label: "Zipper", value: "YKK metal" },
-                  ].map((spec, i) => (
-                    <tr key={i} className="border-b border-gray-50 last:border-0">
-                      <td className="py-3 text-gray-700 font-medium w-1/3">{spec.label}</td>
-                      <td className="py-3 text-gray-500">{spec.value}</td>
+                  {product.dimensions && (
+                    <>
+                      {product.dimensions.length !== "0" && (
+                        <tr className="border-b border-gray-50">
+                          <td className="py-3 text-gray-700 font-medium w-1/3">Length</td>
+                          <td className="py-3 text-gray-500">{product.dimensions.length} cm</td>
+                        </tr>
+                      )}
+                      {product.dimensions.width !== "0" && (
+                        <tr className="border-b border-gray-50">
+                          <td className="py-3 text-gray-700 font-medium w-1/3">Width</td>
+                          <td className="py-3 text-gray-500">{product.dimensions.width} cm</td>
+                        </tr>
+                      )}
+                      {product.dimensions.height !== "0" && (
+                        <tr className="border-b border-gray-50">
+                          <td className="py-3 text-gray-700 font-medium w-1/3">Height</td>
+                          <td className="py-3 text-gray-500">{product.dimensions.height} cm</td>
+                        </tr>
+                      )}
+                    </>
+                  )}
+                  {product.weight && product.weight !== "0" && (
+                    <tr className="border-b border-gray-50">
+                      <td className="py-3 text-gray-700 font-medium w-1/3">Weight</td>
+                      <td className="py-3 text-gray-500">{product.weight} kg</td>
+                    </tr>
+                  )}
+                  {product.attributes.filter(attr => attr.visible).map((attr) => (
+                    <tr key={attr.id} className="border-b border-gray-50 last:border-0">
+                      <td className="py-3 text-gray-700 font-medium w-1/3">{attr.name}</td>
+                      <td className="py-3 text-gray-500">{attr.options?.join(", ") || attr.option}</td>
                     </tr>
                   ))}
+                  {(!product.dimensions || (product.dimensions.length === "0" && product.dimensions.width === "0" && product.dimensions.height === "0")) && 
+                   (!product.weight || product.weight === "0") && 
+                   product.attributes.filter(attr => attr.visible).length === 0 && (
+                    <tr>
+                      <td colSpan={2} className="py-8 text-center text-gray-500">
+                        No additional information available.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             )}
 
             {activeTab === "reviews" && (
-              <div className="text-center py-6">
-                <p className="text-gray-500 mb-4 text-xs">No reviews yet. Be the first to review this product!</p>
-                <button className="px-5 py-2 bg-black text-white text-xs font-medium hover:bg-gray-800 transition-colors">
-                  Write a Review
-                </button>
-              </div>
+              <ProductReviews 
+                productId={product.id}
+                averageRating={product.average_rating}
+                reviewCount={product.rating_count}
+              />
             )}
 
             {activeTab === "shipping" && (
