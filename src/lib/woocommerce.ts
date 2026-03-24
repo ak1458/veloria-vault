@@ -320,16 +320,16 @@ export async function getParentProducts(options: {
   search?: string;
 } = {}): Promise<WCProduct[]> {
   try {
-    // Fetch all products then filter for parent products (not variations)
+    // Fetch only variable products (parents) directly from the API
     const products = await getProducts({
       per_page: options.per_page ?? 100,
+      type: "variable",
       search: options.search,
       orderby: "menu_order",
       order: "asc",
     });
 
-    // Filter to only include parent products (not variations)
-    // Parent products have parent_id === 0
+    // Filter to only include parent products (redundant but safe)
     let parentProducts = products.filter((product) => product.parent_id === 0);
 
     // Filter by category if provided
