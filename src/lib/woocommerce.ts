@@ -81,9 +81,9 @@ export interface WCReview {
   };
 }
 
-const WC_API_URL = process.env.WC_API_URL;
-const CONSUMER_KEY = process.env.WC_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.WC_CONSUMER_SECRET;
+const WC_API_URL = process.env.WC_API_URL?.trim();
+const CONSUMER_KEY = process.env.WC_CONSUMER_KEY?.trim();
+const CONSUMER_SECRET = process.env.WC_CONSUMER_SECRET?.trim();
 
 function getAuthHeader(): string {
   return "Basic " + Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString("base64");
@@ -108,10 +108,11 @@ async function wcFetch<T>(
     }
   });
 
-  // Remove newlines and use standard Basic Auth header
-  const auth = Buffer.from(`${CONSUMER_KEY?.trim()}:${CONSUMER_SECRET?.trim()}`).toString("base64");
+  // Use standard Basic Auth header
+  const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString("base64");
 
-  console.log(`[wcFetch] Fetching ${url.toString()} (Headers Auth, Key length: ${CONSUMER_KEY?.trim().length})`);
+  console.log(`[wcFetch] START: ${url.toString()}`);
+  console.log(`[wcFetch] AUTH: Basic ${auth.substring(0, 8)}...`);
 
   const response = await fetch(url.toString(), {
     headers: {
