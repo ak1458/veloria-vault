@@ -281,6 +281,7 @@ export async function getVariationProducts(options: {
 } = {}): Promise<WCProduct[]> {
   const products = await getProducts({
     per_page: 100,
+    type: "variation",
     search: options.search,
     orderby: "menu_order",
     order: "asc",
