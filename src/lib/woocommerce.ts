@@ -112,20 +112,19 @@ async function wcFetch<T>(
     }
   });
 
-  // Use standard Basic Auth header
+  // Remove newlines and use standard Basic Auth header
   const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString("base64");
 
-  const logMsg = `[wcFetch] START: ${url.toString()} | AUTH: Basic ${auth.substring(0, 8)}...`;
-  console.log(logMsg);
-  logToFile(logMsg);
+  const finalUrl = url.toString();
+  console.log(`[wcFetch] FETCHING: ${finalUrl}`);
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(finalUrl, {
+    method: 'GET',
     headers: {
       "Authorization": `Basic ${auth}`,
-      "Content-Type": "application/json",
-      "User-Agent": "Veloria-Vault-NextJS",
+      "Accept": "application/json",
     },
-    next: { revalidate: 300 },
+    next: { revalidate: 3600 }, // Increase revalidate for stability
   });
 
   if (!response.ok) {
