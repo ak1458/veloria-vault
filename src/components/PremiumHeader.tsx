@@ -40,14 +40,6 @@ const NAV_ITEMS: NavItem[] = [
           { label: "Laptop Bag", href: "/product-category/laptop-bag" },
           { label: "New Arrivals", href: "/shop?new=true" },
         ]
-      },
-      {
-        title: "Shop By Tag",
-        items: [
-          { label: "Leather", href: "/shop?tag=leather" },
-          { label: "Handmade", href: "/shop?tag=handmade" },
-          { label: "Travel", href: "/shop?tag=travel" },
-        ]
       }
     ]
   },

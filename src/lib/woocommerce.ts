@@ -124,7 +124,9 @@ export async function wcFetch<T>(
       "Authorization": `Basic ${auth}`,
       "Accept": "application/json",
     },
-    cache: "no-store", // Ensure fresh data
+    // Cache the response for 1 hour to prevent Vercel Serverless Function 500 timeouts
+    // and to significantly speed up localhost loading times.
+    next: { revalidate: 3600 },
   });
 
   if (!response.ok) {
