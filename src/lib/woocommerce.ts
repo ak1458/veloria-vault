@@ -93,7 +93,7 @@ function getAuthHeader(): string {
   return "Basic " + Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString("base64");
 }
 
-async function wcFetch<T>(
+export async function wcFetch<T>(
   endpoint: string,
   params: Record<string, string | number | boolean> = {},
 ): Promise<T> {
@@ -289,32 +289,31 @@ export async function getVariationProducts(options: {
   search?: string;
 } = {}): Promise<WCProduct[]> {
   try {
-    // 1. Fetch parent products (variable bags) that match the search/category
-    const parents = await getParentProducts({
+    // 1. Fetch all products because variations are returned directly on /products
+    let products = await getProducts({
       per_page: 100,
-      categorySlug: options.categorySlug,
       search: options.search,
     });
 
-    if (!parents.length) {
-      console.log("[getVariationProducts] No parent products found for filter.");
+    if (!products.length) {
+      console.log("[getVariationProducts] No products found.");
       return [];
     }
 
-    // 2. Fetch variations for each parent in parallel
-    const variationsArrays = await Promise.all(
-      parents.map(async (parent) => {
-        const variations = await getProductVariations(parent.id);
-        // Map parent slug to variations for linking
-        return variations.map(v => ({
-          ...v,
-          parent_slug: parent.slug, // Helper for linking
-          categories: parent.categories, // Inherit categories for filtering
-        }));
-      })
-    );
+    // 2. Filter by category if provided
+    if (options.categorySlug) {
+      products = products.filter((product) =>
+        product.categories && product.categories.some((category) => category.slug === options.categorySlug)
+      );
+    }
 
-    const variations = variationsArrays.flat();
+    // 3. Ensure parent_slug is mapped for getRelativeProductLink
+    const variations = products.map((product) => ({
+      ...product,
+      // If parent_slug isn't available, rely on its own slug for links
+      parent_slug: product.slug, 
+    }));
+
     console.log(`[getVariationProducts] Found ${variations.length} variations total.`);
     return variations;
   } catch (error) {
