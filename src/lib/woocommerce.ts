@@ -115,6 +115,10 @@ export async function wcFetch<T>(
   // Remove newlines and use standard Basic Auth header
   const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString("base64");
 
+  // Add a cache bust parameter to forcefully bypass the poisoned Vercel data cache
+  // Next.js remembers the empty responses from the old broken API keys.
+  url.searchParams.append("v", "1");
+
   const finalUrl = url.toString();
   console.log(`[wcFetch] FETCHING: ${finalUrl} (cache: no-store)`);
 
