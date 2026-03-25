@@ -73,9 +73,11 @@ export async function POST(request: NextRequest) {
       return {
         ...clientItem,
         price: parseFloat(realProduct.price || realProduct.regular_price || "0"),
-        slug: "", image: "", category: ""
+        slug: "", image: "", category: "" // Satisfy internal types if needed
       };
     });
+
+    console.log("[Checkout] Secure items prepared:", secureItems.length);
 
     let customerId = 0;
     
