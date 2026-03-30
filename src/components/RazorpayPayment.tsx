@@ -23,7 +23,7 @@ interface RazorpayResponse {
 }
 
 interface RazorpayOptions {
-  key: string | undefined;
+  key: string;
   amount: number;
   currency: string;
   name: string;
@@ -89,20 +89,18 @@ export default function RazorpayPayment({
   const handlePayment = async () => {
     setIsLoading(true);
     try {
+      // Load Razorpay SDK
       await loadRazorpayScript();
 
-      // Create Razorpay order
+      // Create order via secure API (key is server-side)
       const response = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount,
-          currency: "INR",
-          receipt: orderNumber,
-          notes: {
-            order_id: orderId,
-            customer_email: customerDetails.email,
-          },
+          orderId,
+          orderNumber,
+          customerDetails,
         }),
       });
 
@@ -113,7 +111,7 @@ export default function RazorpayPayment({
       }
 
       const options: RazorpayOptions = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: orderData.key, // Public key from server
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Veloria Vault",

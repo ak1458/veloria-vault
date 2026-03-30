@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 const subscribeSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -14,6 +15,21 @@ const subscribers = new Set<string>();
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 2 subscriptions per IP per hour
+    const clientIP = getClientIP(request);
+    const rateLimitResult = rateLimit(
+      `newsletter:${clientIP}`,
+      2,
+      60 * 60 * 1000 // 1 hour
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many subscription attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     
     // Validate email

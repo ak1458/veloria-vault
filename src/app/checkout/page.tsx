@@ -413,7 +413,8 @@ export default function CheckoutPage() {
                     {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
               {currentStep === 2 && (
                 <div className="space-y-4">
@@ -498,7 +499,7 @@ export default function CheckoutPage() {
                     ) : (
                       <>
                         <span>
-                          {isPrepaid ? "Continue to Payment" : "Place Order"} · ₹{(calculation?.finalTotal || 0).toLocaleString("en-IN")}
+                          {isPrepaid ? "Continue to Payment" : "Place Order"} - ₹{(calculation?.finalTotal || 0).toLocaleString("en-IN")}
                         </span>
                         <ArrowRight size={14} />
                       </>
