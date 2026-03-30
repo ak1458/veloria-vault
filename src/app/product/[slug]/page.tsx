@@ -31,9 +31,13 @@ export async function generateMetadata({
   return {
     title: `${product.name} | Veloria Vault`,
     description: stripHtml(product.short_description || product.description),
+    alternates: {
+      canonical: `/product/${slug}`,
+    },
     openGraph: {
       title: product.name,
       description: stripHtml(product.short_description || product.description),
+      url: `/product/${slug}`,
       images: product.images[0]?.src ? [product.images[0].src] : [],
     },
   };

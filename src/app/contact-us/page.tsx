@@ -4,6 +4,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { Mail, Phone, Send } from "lucide-react";
 
+// Metadata needs to be in a separate file for client components
+// Creating a separate metadata export in layout or using generateMetadata
+
 export default function ContactUsPage() {
   const [formData, setFormData] = useState({
     name: "",
@@ -42,22 +45,22 @@ export default function ContactUsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Banner */}
-      <div className="relative bg-[#1a1a1a] py-20 md:py-28">
-        <div 
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: "url('https://veloriavault.com/wp-content/uploads/2026/01/Bag-8-3-scaled.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+      <div className="relative bg-[#1a1a1a] h-[300px] md:h-[400px] overflow-hidden">
+        {/* Background Image - Using img tag for better object-fit control */}
+        <div className="absolute inset-0">
+          <img
+            src="/images/covers/contact us.png"
+            alt=""
+            className="w-full h-full object-cover object-center lg:object-[center_40%]"
+            style={{ opacity: 0.6 }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/30" />
         </div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-4">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-white text-center">
             CONTACT US
           </h1>
-          <p className="text-gray-300 text-center mt-4 max-w-2xl mx-auto">
+          <p className="text-gray-300 text-center mt-4 max-w-2xl mx-auto text-sm md:text-base">
             We&apos;d love to hear from you. Reach out for any questions, support, or just to say hello.
           </p>
         </div>
@@ -204,7 +207,7 @@ export default function ContactUsPage() {
             <div className="space-y-8">
               <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
                 <Image
-                  src="https://veloriavault.com/wp-content/uploads/2026/01/Bag-14-15-16-4-scaled.jpg"
+                  src="/images/covers/about.png"
                   alt="Veloria Vault Collection"
                   fill
                   sizes="(min-width: 1024px) 40vw, 100vw"

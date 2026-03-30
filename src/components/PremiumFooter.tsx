@@ -14,10 +14,10 @@ const COLLECTIONS = [
 ];
 
 const IMPORTANT_LINKS = [
-  { label: "Refund & Cancellation", href: "/cancellation-refund" },
+  { label: "Refund & Cancellation", href: "/cancellation-refund-policy" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Shipping Policy", href: "/shipping-policy" },
-  { label: "Return Policy", href: "/refund-returns" },
+  { label: "Return Policy", href: "/refund_returns" },
   { label: "Warranty Policy", href: "/warranty-policy" },
   { label: "Terms & Conditions", href: "/terms-conditions" },
 ];
@@ -57,7 +57,7 @@ export default function PremiumFooter() {
       } else {
         setMessage({ type: "error", text: data.error || "Failed to subscribe" });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: "error", text: "Something went wrong. Please try again." });
     } finally {
       setIsLoading(false);

@@ -1,26 +1,43 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "About Us | Veloria Vault",
   description: "Learn about Veloria Vault - timeless leather goods for the modern minimalist.",
+  alternates: {
+    canonical: "/about",
+  },
+  openGraph: {
+    title: "About Us | Veloria Vault",
+    description: "Learn about Veloria Vault - timeless leather goods for the modern minimalist.",
+    url: "/about",
+    images: [
+      {
+        url: "/images/covers/about.png",
+        width: 1200,
+        height: 630,
+        alt: "About Veloria Vault",
+      },
+    ],
+  },
 };
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Banner */}
-      <div className="relative bg-[#1a1a1a] py-20 md:py-28">
-        <div 
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: "url('https://veloriavault.com/wp-content/uploads/2026/01/Bag-14-15-16-4-scaled.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+      <div className="relative bg-[#1a1a1a] h-[300px] md:h-[400px] overflow-hidden">
+        {/* Background Image - Using img tag for better object-fit control */}
+        <div className="absolute inset-0">
+          <img
+            src="/images/covers/about.png"
+            alt=""
+            className="w-full h-full object-cover object-center lg:object-[center_30%]"
+            style={{ opacity: 0.6 }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/30" />
         </div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-white text-center">
             ABOUT US
           </h1>

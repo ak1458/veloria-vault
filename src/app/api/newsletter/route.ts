@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { rateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
+import { rateLimit, getClientIP } from "@/lib/rate-limit";
 
 const subscribeSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

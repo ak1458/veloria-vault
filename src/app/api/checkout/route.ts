@@ -77,7 +77,7 @@ async function validateStock(
   
   // Fetch real products with stock info
   const productIds = items.map((i) => i.id);
-  let realProducts = await getProductsByIds(productIds);
+  const realProducts = await getProductsByIds(productIds);
   
   // For any missing products (likely variations), fetch individually
   const missingIds = productIds.filter((id) => !realProducts.find((p) => p.id === id));

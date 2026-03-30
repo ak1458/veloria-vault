@@ -103,18 +103,18 @@ export default function ShopContent({
 
   return (
     <div className="min-h-screen bg-white pb-20 lg:pb-0">
-      <div className="relative bg-[#1a1a1a] py-20 md:py-28">
-        <div
-          className="absolute inset-0 opacity-60"
-          style={{
-            backgroundImage: "url('https://veloriavault.com/wp-content/uploads/2026/01/Bag-14-15-16-4-scaled.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
+      <div className="relative bg-[#1a1a1a] h-[300px] md:h-[400px] overflow-hidden">
+        {/* Background Image - Using img tag for better object-fit control */}
+        <div className="absolute inset-0">
+          <img
+            src="/images/covers/shop.png"
+            alt=""
+            className="w-full h-full object-cover object-center lg:object-[center_35%]"
+            style={{ opacity: 0.7 }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-black/20" />
         </div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-white text-center">
             {searchTerm ? "SEARCH RESULTS" : "SHOP"}
           </h1>

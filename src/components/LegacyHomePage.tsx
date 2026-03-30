@@ -146,9 +146,9 @@ export default async function LegacyHomePage() {
                   <div className="w-8 h-8 md:w-12 md:h-12 lg:w-14 lg:h-14 mb-2 md:mb-4 text-[#b59a5c]">
                     <Icon className="w-full h-full" strokeWidth={1.5} aria-hidden="true" />
                   </div>
-                  <h3 className="text-[11px] md:text-sm lg:text-base font-semibold text-gray-900 mb-1 md:mb-2 tracking-tight leading-tight">
+                  <h2 className="text-[11px] md:text-sm lg:text-base font-semibold text-gray-900 mb-1 md:mb-2 tracking-tight leading-tight">
                     {feature.title}
-                  </h3>
+                  </h2>
                   <p className="text-[9px] md:text-xs lg:text-sm text-gray-600 leading-relaxed max-w-[120px] md:max-w-[200px]">
                     {feature.description}
                   </p>
