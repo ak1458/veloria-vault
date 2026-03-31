@@ -76,7 +76,7 @@ export default function OrderSummary({ showCouponSection = true }: OrderSummaryP
             <button
               onClick={() => setIsPrepaid(true)}
               className={`flex-1 py-2 px-3 text-xs font-medium rounded transition-colors ${
-                isPrepaid
+                isPrepaid === true
                   ? "bg-[#b59a5c] text-white"
                   : "bg-white text-gray-600 border border-gray-200"
               }`}
@@ -87,7 +87,7 @@ export default function OrderSummary({ showCouponSection = true }: OrderSummaryP
             <button
               onClick={() => setIsPrepaid(false)}
               className={`flex-1 py-2 px-3 text-xs font-medium rounded transition-colors ${
-                !isPrepaid
+                isPrepaid === false
                   ? "bg-[#b59a5c] text-white"
                   : "bg-white text-gray-600 border border-gray-200"
               }`}
@@ -145,7 +145,7 @@ export default function OrderSummary({ showCouponSection = true }: OrderSummaryP
         </div>
 
         {/* COD Fee */}
-        {!isPrepaid && (
+        {isPrepaid === false && (
           <div className="flex justify-between text-amber-600">
             <span className="text-xs flex items-center gap-1">
               <AlertCircle size={12} /> COD Fee

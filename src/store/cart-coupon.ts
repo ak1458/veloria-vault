@@ -9,7 +9,7 @@ let activeCalculationController: AbortController | null = null;
 interface CouponState {
   appliedCouponCodes: string[];
   calculation: DiscountCalculation | null;
-  isPrepaid: boolean;
+  isPrepaid: boolean | null;
   isLoading: boolean;
   error: string | null;
   
@@ -31,7 +31,7 @@ export const useCouponStore = create<CouponState>()(
     (set, get) => ({
       appliedCouponCodes: [],
       calculation: null,
-      isPrepaid: true,
+      isPrepaid: null,
       isLoading: false,
       error: null,
 
@@ -187,7 +187,7 @@ export const useCouponStore = create<CouponState>()(
       name: "veloria-coupons",
       partialize: (state) => ({ 
         appliedCouponCodes: state.appliedCouponCodes,
-        isPrepaid: state.isPrepaid,
+
       }),
     }
   )

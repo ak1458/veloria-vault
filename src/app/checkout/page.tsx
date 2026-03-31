@@ -60,6 +60,11 @@ export default function CheckoutPage() {
   // Store form values for payment screen
   const handleFormSubmit = (data: CheckoutFormData) => {
     formDataRef.current = data;
+    if (currentStep === 1) {
+      setCurrentStep(2);
+      setOrderError(null);
+      return;
+    }
     onSubmit(data);
   };
 
@@ -435,12 +440,12 @@ export default function CheckoutPage() {
                   
                   <div className="space-y-3">
                     <label className={`border-2 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
-                      isPrepaid ? "border-[#b59a5c] bg-[#b59a5c]/5" : "border-gray-200 hover:border-gray-300"
+                      isPrepaid === true ? "border-[#b59a5c] bg-[#b59a5c]/5" : "border-gray-200 hover:border-gray-300"
                     }`}>
                       <div className="flex items-center space-x-3">
                         <input 
                           type="radio" 
-                          checked={isPrepaid}
+                          checked={isPrepaid === true}
                           onChange={() => setIsPrepaid(true)}
                           className="text-[#b59a5c]"
                         />
@@ -456,12 +461,12 @@ export default function CheckoutPage() {
                     </label>
 
                     <label className={`border-2 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
-                      !isPrepaid ? "border-[#b59a5c] bg-[#b59a5c]/5" : "border-gray-200 hover:border-gray-300"
+                      isPrepaid === false ? "border-[#b59a5c] bg-[#b59a5c]/5" : "border-gray-200 hover:border-gray-300"
                     }`}>
                       <div className="flex items-center space-x-3">
                         <input 
                           type="radio" 
-                          checked={!isPrepaid}
+                          checked={isPrepaid === false}
                           onChange={() => setIsPrepaid(false)}
                           className="text-[#b59a5c]"
                         />
@@ -501,7 +506,7 @@ export default function CheckoutPage() {
                 ) : (
                   <button 
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isPrepaid === null}
                     className="flex items-center space-x-2 bg-[#1a1a1a] text-white px-6 py-3 rounded text-xs font-bold uppercase tracking-widest hover:bg-[#b59a5c] transition-colors disabled:opacity-50"
                   >
                     {isSubmitting ? (
@@ -512,7 +517,7 @@ export default function CheckoutPage() {
                     ) : (
                       <>
                         <span>
-                          {isPrepaid ? "Continue to Payment" : "Place Order"} - ₹{(calculation?.finalTotal || 0).toLocaleString("en-IN")}
+                          {isPrepaid === null ? "Select Payment Method" : isPrepaid ? "Continue to Payment" : "Place Order"} - ₹{(calculation?.finalTotal || 0).toLocaleString("en-IN")}
                         </span>
                         <ArrowRight size={14} />
                       </>
