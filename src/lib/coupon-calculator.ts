@@ -6,6 +6,7 @@ import {
   COD_FEE,
   FREE_SHIPPING_THRESHOLD,
   STANDARD_SHIPPING_COST,
+  MAX_DISCOUNT_PERCENT,
 } from "@/types/coupon";
 import { CartItem } from "@/store/cart";
 import { AVAILABLE_COUPONS } from "@/config/coupons";
@@ -21,11 +22,14 @@ export interface CalculationInput {
 function getCouponByCode(code: string, luckyDrawDiscount?: number): Coupon | null {
   let coupon = AVAILABLE_COUPONS.find((item) => item.code.toUpperCase() === code.toUpperCase());
 
+  // Dynamic Lucky Draw Coupon
   if (!coupon && code.toUpperCase() === "LUCKYDRAW" && luckyDrawDiscount) {
     coupon = {
       id: "lucky-draw-dynamic",
       code: "LUCKYDRAW",
       type: "percentage",
+      category: "lucky_draw",
+      stackable: true,
       amount: luckyDrawDiscount,
       description: `Lucky Draw Winner - ${luckyDrawDiscount}% Off`,
       isActive: true,
@@ -68,46 +72,51 @@ function getCouponValidationError(
   return null;
 }
 
-function calculateCouponAmount(coupon: Coupon, subtotal: number): number {
-  let discountAmount = 0;
-
-  if (coupon.type === "percentage") {
-    discountAmount = Math.round((subtotal * coupon.amount) / 100);
-  } else if (coupon.type === "fixed_cart") {
-    discountAmount = coupon.amount;
-  }
-
-  if (coupon.maxDiscount) {
-    discountAmount = Math.min(discountAmount, coupon.maxDiscount);
-  }
-
-  return Math.min(discountAmount, subtotal);
-}
-
-function resolveBestCoupon(
+function resolveValidCoupons(
   appliedCouponCodes: string[],
   subtotal: number,
   itemCount: number,
   luckyDrawDiscount?: number,
 ): CartCoupon[] {
   const uniqueCodes = Array.from(new Set(appliedCouponCodes.map((code) => code.toUpperCase())));
+  
   const validCoupons = uniqueCodes
     .map((code) => getCouponByCode(code, luckyDrawDiscount))
     .filter((coupon): coupon is Coupon => Boolean(coupon))
-    .map((coupon) => ({
-      coupon,
-      error: getCouponValidationError(coupon, subtotal, itemCount),
-    }))
-    .filter((entry) => !entry.error)
-    .map(({ coupon }) => ({
-      coupon,
-      discountAmount: calculateCouponAmount(coupon, subtotal),
-      appliedTo: "subtotal" as const,
-    }))
-    .filter((entry) => entry.discountAmount > 0)
-    .sort((left, right) => right.discountAmount - left.discountAmount);
+    .filter((coupon) => !getCouponValidationError(coupon, subtotal, itemCount))
+    .map((coupon) => {
+      let rawAmount = 0;
+      if (coupon.type === "percentage") {
+        rawAmount = Math.round((subtotal * coupon.amount) / 100);
+      } else if (coupon.type === "fixed_cart") {
+        rawAmount = coupon.amount;
+      }
+      
+      if (coupon.maxDiscount) {
+        rawAmount = Math.min(rawAmount, coupon.maxDiscount);
+      }
 
-  return validCoupons.length > 0 ? [validCoupons[0]] : [];
+      return {
+        coupon,
+        rawAmount,
+        discountAmount: rawAmount, // Will be scaled later if capped
+        appliedTo: "subtotal" as const,
+      };
+    })
+    .filter((entry) => entry.rawAmount > 0);
+
+  // Stacking logic validation
+  // If any coupon is NON-stackable (standard), it overrides all others except prepaid.
+  const hasNonStackable = validCoupons.some(c => !c.coupon.stackable);
+  if (hasNonStackable) {
+    // Return only the best single non-stackable coupon if there are multiple somehow
+    return validCoupons
+      .filter(c => !c.coupon.stackable)
+      .sort((a, b) => b.rawAmount - a.rawAmount)
+      .slice(0, 1);
+  }
+
+  return validCoupons;
 }
 
 export function calculateDiscounts(input: CalculationInput): DiscountCalculation {
@@ -116,51 +125,105 @@ export function calculateDiscounts(input: CalculationInput): DiscountCalculation
   const originalSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const prepaidDiscountAmount = isPrepaid
+  if (originalSubtotal === 0) {
+    return {
+      originalSubtotal: 0, itemCount: 0, isPrepaid, appliedCoupons: [], tierDiscount: 0,
+      prepaidDiscount: 0, manualCouponDiscount: 0, codFee: 0, shippingCost: 0, finalTotal: 0,
+      isCapped: false, savingsBreakdown: [],
+    };
+  }
+
+  // 1. Automatic Tier Discount (1 item = 15%, 2+ items = 20%)
+  const tierPercent = itemCount >= 2 ? 20 : 15;
+  const rawTierDiscount = Math.round((originalSubtotal * tierPercent) / 100);
+
+  // 2. Prepaid Discount
+  const rawPrepaidDiscount = isPrepaid
     ? Math.round((originalSubtotal * PREPAID_BONUS_PERCENT) / 100)
     : 0;
 
-  const appliedCoupons = resolveBestCoupon(
+  // 3. Manual Coupons
+  const appliedCoupons = resolveValidCoupons(
     appliedCouponCodes,
     originalSubtotal,
     itemCount,
     luckyDrawDiscount,
   );
-  const manualCouponDiscountAmount = appliedCoupons.reduce(
-    (sum, item) => sum + item.discountAmount,
-    0,
-  );
+  const rawManualDiscount = appliedCoupons.reduce((sum, item) => sum + item.rawAmount, 0);
 
-  const subtotalAfterDiscounts = Math.max(
-    0,
-    originalSubtotal - prepaidDiscountAmount - manualCouponDiscountAmount,
-  );
+  // --- THE ALGORITHM: PROPORTIONAL 35% CAP ---
+  const totalRawDiscount = rawTierDiscount + rawPrepaidDiscount + rawManualDiscount;
+  const maxAllowedDiscount = Math.round((originalSubtotal * MAX_DISCOUNT_PERCENT) / 100);
+
+  let finalTierDiscount = rawTierDiscount;
+  let finalPrepaidDiscount = rawPrepaidDiscount;
+  let isCapped = false;
+
+  if (totalRawDiscount > maxAllowedDiscount && totalRawDiscount > 0) {
+    isCapped = true;
+    const scaleFactor = maxAllowedDiscount / totalRawDiscount;
+
+    finalTierDiscount = Math.floor(rawTierDiscount * scaleFactor);
+    finalPrepaidDiscount = Math.floor(rawPrepaidDiscount * scaleFactor);
+
+    let actualManualTotal = 0;
+    appliedCoupons.forEach((c) => {
+      c.discountAmount = Math.floor(c.rawAmount * scaleFactor);
+      actualManualTotal += c.discountAmount;
+    });
+
+    // Fix rounding remainder - dump it into tier discount usually, to perfectly match maxAllowed
+    const currentTotal = finalTierDiscount + finalPrepaidDiscount + actualManualTotal;
+    if (currentTotal < maxAllowedDiscount) {
+      finalTierDiscount += (maxAllowedDiscount - currentTotal);
+    }
+  }
+
+  const finalManualDiscountAmount = appliedCoupons.reduce((sum, item) => sum + item.discountAmount, 0);
+  const totalDiscountsApplied = finalTierDiscount + finalPrepaidDiscount + finalManualDiscountAmount;
+
+  const subtotalAfterDiscounts = Math.max(0, originalSubtotal - totalDiscountsApplied);
+  
   const shippingCost = originalSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
   const codFee = !isPrepaid ? COD_FEE : 0;
   const finalTotal = Math.max(0, subtotalAfterDiscounts + shippingCost + codFee);
 
+  // Formatting Savings Breakdown
   const savingsBreakdown: { label: string; amount: number }[] = [];
-  if (prepaidDiscountAmount > 0) {
+  
+  if (finalTierDiscount > 0) {
     savingsBreakdown.push({
-      label: `Prepaid Discount (${PREPAID_BONUS_PERCENT}%)`,
-      amount: prepaidDiscountAmount,
+      label: itemCount >= 2 ? "Automatic Tier Discount (20%)" : "Automatic Tier Discount (15%)",
+      amount: finalTierDiscount,
     });
   }
+  
+  if (finalPrepaidDiscount > 0) {
+    savingsBreakdown.push({
+      label: `Prepaid Bonus (${PREPAID_BONUS_PERCENT}%)`,
+      amount: finalPrepaidDiscount,
+    });
+  }
+  
   appliedCoupons.forEach(({ coupon, discountAmount }) => {
-    savingsBreakdown.push({ label: `Coupon: ${coupon.code}`, amount: discountAmount });
+    savingsBreakdown.push({ 
+      label: coupon.code === "LUCKYDRAW" ? "Lucky Draw Discount" : `Coupon: ${coupon.code}`, 
+      amount: discountAmount 
+    });
   });
 
   return {
     originalSubtotal,
     itemCount,
     isPrepaid,
-    tierDiscount: 0,
-    prepaidDiscount: prepaidDiscountAmount,
-    manualCouponDiscount: manualCouponDiscountAmount,
+    tierDiscount: finalTierDiscount,
+    prepaidDiscount: finalPrepaidDiscount,
+    manualCouponDiscount: finalManualDiscountAmount,
     appliedCoupons,
     codFee,
     shippingCost,
     finalTotal,
+    isCapped,
     savingsBreakdown,
   };
 }
@@ -170,15 +233,13 @@ export function validateCoupon(
   subtotal: number,
   itemCount: number = 1,
   luckyDrawDiscount?: number,
+  existingCoupons: string[] = [],
 ): { valid: boolean; coupon?: Coupon; error?: string } {
   const coupon = getCouponByCode(code, luckyDrawDiscount);
 
   if (!coupon) {
     if (code.toUpperCase() === "LUCKYDRAW") {
-      return {
-        valid: false,
-        error: "Lucky Draw coupon is invalid or expired. Please spin the wheel.",
-      };
+      return { valid: false, error: "Lucky Draw coupon is invalid or expired. Please spin the wheel." };
     }
     return { valid: false, error: "Invalid coupon code" };
   }
@@ -186,6 +247,30 @@ export function validateCoupon(
   const validationError = getCouponValidationError(coupon, subtotal, itemCount);
   if (validationError) {
     return { valid: false, error: validationError };
+  }
+
+  // Check stacking rules against existing
+  if (existingCoupons.length > 0) {
+    if (!coupon.stackable) {
+      return { valid: false, error: "This coupon cannot be combined with other offers." };
+    }
+    // Also check if existing coupons are non-stackable
+    const hasNonStackable = existingCoupons
+      .map(c => getCouponByCode(c, luckyDrawDiscount))
+      .some(c => c && !c.stackable);
+      
+    if (hasNonStackable) {
+      return { valid: false, error: "You already have a non-combinable offer applied to your cart." };
+    }
+    
+    // Prevent same category stacking (e.g. two influencer codes)
+    const existingCategories = existingCoupons
+      .map(c => getCouponByCode(c, luckyDrawDiscount)?.category)
+      .filter(Boolean);
+      
+    if (existingCategories.includes(coupon.category)) {
+      return { valid: false, error: `You can only use one ${coupon.category.replace('_', ' ')} code at a time.` };
+    }
   }
 
   return { valid: true, coupon };

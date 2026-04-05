@@ -10,12 +10,9 @@ if (!JWT_SECRET) {
 }
 
 const OPTIONS = [
-  { discount: 5, weight: 400 },   // 40% chance
-  { discount: 10, weight: 300 },  // 30% chance
-  { discount: 15, weight: 150 },  // 15% chance
-  { discount: 20, weight: 100 },  // 10% chance
-  { discount: 30, weight: 40 },   // 4% chance
-  { discount: 50, weight: 10 },   // 1% chance
+  { discount: 5, weight: 50 },    // 50% chance
+  { discount: 10, weight: 40 },   // 40% chance
+  { discount: 15, weight: 10 },   // 10% chance
 ];
 
 function getRandomDiscount() {

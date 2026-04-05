@@ -116,19 +116,11 @@ export default function OrderSummary({ showCouponSection = true }: OrderSummaryP
           </div>
         ) : null}
 
-        {/* Prepaid Discount */}
-        {calculation?.prepaidDiscount ? (
-          <div className="flex justify-between text-green-600">
-            <span className="text-xs">Prepaid Bonus (5%)</span>
-            <span className="font-medium text-xs">-₹{calculation.prepaidDiscount.toLocaleString("en-IN")}</span>
-          </div>
-        ) : null}
-
-        {/* Manual Coupons */}
-        {calculation?.appliedCoupons.map((applied) => (
-          <div key={applied.coupon.code} className="flex justify-between text-green-600">
-            <span className="text-xs">Coupon: {applied.coupon.code}</span>
-            <span className="font-medium text-xs">-₹{applied.discountAmount.toLocaleString("en-IN")}</span>
+        {/* All Discounts (Tiers, Coupons, Prepaid) */}
+        {calculation?.savingsBreakdown?.map((saving, idx) => (
+          <div key={idx} className="flex justify-between text-green-600">
+            <span className="text-xs">{saving.label}</span>
+            <span className="font-medium text-xs">-₹{saving.amount.toLocaleString("en-IN")}</span>
           </div>
         ))}
 

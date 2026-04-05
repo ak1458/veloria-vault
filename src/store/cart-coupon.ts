@@ -44,7 +44,7 @@ export const useCouponStore = create<CouponState>()(
           return { success: false, error: "Coupon already applied" };
         }
 
-        if (appliedCouponCodes.length > 0) {
+        if (false) {
           return { success: false, error: "Only one coupon can be applied per order" };
         }
 
@@ -57,7 +57,7 @@ export const useCouponStore = create<CouponState>()(
 
         // Add coupon
         set({ 
-          appliedCouponCodes: [normalizedCode],
+          appliedCouponCodes: [...appliedCouponCodes, normalizedCode],
           error: null,
         });
 
@@ -67,6 +67,10 @@ export const useCouponStore = create<CouponState>()(
         );
 
         if (!latestCalculation || !wasApplied) {
+          // Rollback
+          set({
+            appliedCouponCodes: appliedCouponCodes.filter(c => c !== normalizedCode),
+          });
           return {
             success: false,
             error:
@@ -174,7 +178,7 @@ export const useCouponStore = create<CouponState>()(
           const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
           const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
           const response = await fetch(
-            `/api/coupons/validate?code=${encodeURIComponent(code)}&subtotal=${subtotal}&itemCount=${itemCount}`
+            `/api/coupons/validate?code=${encodeURIComponent(code)}&subtotal=${subtotal}&itemCount=${itemCount}&existingCoupons=${encodeURIComponent(get().appliedCouponCodes.join(","))}`
           );
           const data = await response.json();
           return { valid: data.success, error: data.error };

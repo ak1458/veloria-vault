@@ -40,15 +40,15 @@ export default function CouponSection() {
         <div className="flex items-center gap-2 mb-1">
           <Sparkles className="w-4 h-4 text-[#b59a5c]" />
           <span className="text-sm font-medium text-gray-800">
-            Available Offers
+            Current Tier Offers
           </span>
         </div>
         <ul className="text-sm text-gray-600 space-y-1.5 ml-6 list-disc">
           <li>
-            Use code <strong className="text-gray-800 tracking-wide">FLAT15</strong> to get <span className="text-[#b59a5c] font-medium">15% Off</span>
+            Buy 1 item to get <span className="text-[#b59a5c] font-medium">15% Off</span> automatically
           </li>
           <li>
-            Buy 2 or more & use code <strong className="text-gray-800 tracking-wide">FLAT20</strong> to get <span className="text-[#b59a5c] font-medium">20% Off</span>
+            Buy 2 or more & get <span className="text-[#b59a5c] font-medium">20% Off</span> automatically
           </li>
         </ul>
       </div>
@@ -56,11 +56,11 @@ export default function CouponSection() {
       <div className="mb-4 p-4 bg-[#1a1a1a] rounded-lg flex items-center justify-between">
         <div>
           <p className="text-white text-sm font-medium">Want an extra discount?</p>
-          <p className="text-gray-400 text-xs mt-0.5">Spin the Lucky Wheel to win up to 50% off!</p>
+          <p className="text-gray-400 text-xs mt-0.5">Spin the Lucky Wheel to win up to 15% off!</p>
         </div>
         <Sparkles className="w-6 h-6 text-[#b59a5c]" />
       </div>
-      <p className="text-xs text-gray-500 mb-4">Only one coupon can be applied per order.</p>
+      <p className="text-xs text-gray-500 mb-4">You can apply extra influencer or seasonal codes below.</p>
 
       {/* Coupon Input */}
       <div className="flex gap-2 mb-4">

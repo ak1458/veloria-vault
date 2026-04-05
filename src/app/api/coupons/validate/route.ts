@@ -7,6 +7,7 @@ const validateSchema = z.object({
   code: z.string().min(1),
   subtotal: z.number().min(0),
   itemCount: z.number().min(1).default(1),
+  existingCoupons: z.array(z.string()).default([]),
 });
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -23,10 +24,11 @@ export async function GET(request: NextRequest) {
       code: searchParams.get("code"),
       subtotal: parseFloat(searchParams.get("subtotal") || "0"),
       itemCount: parseInt(searchParams.get("itemCount") || "1", 10),
+      existingCoupons: searchParams.getAll("existingCoupons[]") || [],
     };
 
     const validatedData = validateSchema.parse(body);
-    const { code, subtotal, itemCount } = validatedData;
+    const { code, subtotal, itemCount, existingCoupons } = validatedData;
     
     // Check for HttpOnly Lucky Draw Token
     const token = request.cookies.get("veloria_lucky_draw")?.value;
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    const result = validateCoupon(code, subtotal, itemCount, luckyDrawDiscount);
+    const result = validateCoupon(code, subtotal, itemCount, luckyDrawDiscount, existingCoupons);
     
     return NextResponse.json({
       success: result.valid,

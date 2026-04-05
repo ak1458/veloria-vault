@@ -1,7 +1,11 @@
+export type CouponCategory = "standard" | "influencer" | "seasonal" | "lucky_draw" | "payment" | "bogo";
+
 export interface Coupon {
   id: string;
   code: string;
   type: "percentage" | "fixed_cart" | "fixed_product" | "tiered" | "prepaid_bonus";
+  category: CouponCategory;
+  stackable: boolean;
   amount: number;
   description: string;
   minPurchase?: number;
@@ -15,22 +19,14 @@ export interface Coupon {
   excludedProductIds?: number[];
   categoryIds?: number[];
   excludedCategoryIds?: number[];
-  // Tiered discount specific
-  // Tiered discount specific (deprecated, now using manual coupons)
-  tiers?: {
-    minQuantity: number;
-    discountPercent: number;
-    bonusPrepaidDiscount?: number;
-  }[];
-  // Minimum quantity required in cart for this coupon to apply
   minQuantity?: number;
-  // For automatic coupons (like tiered discounts)
   isAutomatic: boolean;
 }
 
 export interface CartCoupon {
   coupon: Coupon;
-  discountAmount: number;
+  discountAmount: number; // The actual visible amount (might be scaled down)
+  rawAmount: number;      // Unscaled theoretical amount
   appliedTo: "subtotal" | "shipping" | "total";
 }
 
@@ -39,20 +35,23 @@ export interface DiscountCalculation {
   itemCount: number;
   isPrepaid: boolean;
   appliedCoupons: CartCoupon[];
-  tierDiscount: number;
+  tierDiscount: number;   // 1 item = 15%, 2+ items = 20%
   prepaidDiscount: number;
   manualCouponDiscount: number;
   codFee: number;
   shippingCost: number;
   finalTotal: number;
+  isCapped: boolean; // Indicates if scaling happened in the backend
   savingsBreakdown: {
     label: string;
     amount: number;
   }[];
 }
 
-export const PREPAID_BONUS_PERCENT = 5;
+// Global Cap Rule
+export const MAX_DISCOUNT_PERCENT = 35; 
 
+export const PREPAID_BONUS_PERCENT = 5;
 export const COD_FEE = 149;
 export const FREE_SHIPPING_THRESHOLD = 3000;
 export const STANDARD_SHIPPING_COST = 150;

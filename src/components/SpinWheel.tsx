@@ -10,9 +10,9 @@ const SEGMENTS = [
   { discount: 5,  color: "#ff6b6b", label: "5% OFF" },
   { discount: 10, color: "#4ecdc4", label: "10% OFF" },
   { discount: 15, color: "#45b7d1", label: "15% OFF" },
-  { discount: 20, color: "#f9ca24", label: "20% OFF" },
-  { discount: 30, color: "#6c5ce7", label: "30% OFF" },
-  { discount: 50, color: "#ff9f43", label: "50% OFF" },
+  { discount: 5,  color: "#f9ca24", label: "5% OFF" },
+  { discount: 10, color: "#6c5ce7", label: "10% OFF" },
+  { discount: 5,  color: "#ff9f43", label: "5% OFF" },
 ];
 
 export function SpinWheel() {
